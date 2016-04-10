@@ -45,6 +45,59 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "kylesmathlib.h"
+
+/* Main method to test math */
+int main() {
+    // Test matrix math
+    struct Matrix a;
+    double valuesa[9] = { 5.0, -2.0, 1.0, 0.0, 3.0, -1.0, 2.0, 0.0, 7.0 };
+    newMatrix(&a, valuesa, 3, 3);
+    struct Matrix b;
+    double valuesb[9] = { 1.0, 2.0, 3.0, 0.0, -4.0, 1.0, 0.0, 3.0, -1.0 };
+    newMatrix(&b, valuesb, 3, 3);
+    printf("A=\n");
+    matrixToString(a);
+    printf("B=\n");
+    matrixToString(b);
+    printf("A is %sa square matrix.\n", matrixIsSquare(a) ? "" : "not ");
+    printf("B is %sa square matrix.\n", matrixIsSquare(b) ? "" : "not ");
+    printf("The determinant of A is %f.\n", matrixDeterminant(a));
+    printf("A is %sunique.\n", matrixIsUnique(a) ? "" : "not ");
+    printf("The determinant of B is %f.\n", matrixDeterminant(b));
+    printf("B is %sunique.\n", matrixIsUnique(b) ? "" : "not ");
+
+    // Add
+    struct Matrix aplusb;
+    matrixAdd(&aplusb, a, b);
+    printf("A+B=\n");
+    matrixToString(aplusb);
+
+    // Subtract
+    struct Matrix asubb;
+    matrixSubtract(&asubb, a, b);
+    printf("A-B=\n");
+    matrixToString(asubb);
+
+    struct Matrix ascale;
+    matrixScale(&ascale, a, 5);
+    printf("5A=\n");
+    matrixToString(ascale);
+    struct Matrix bscale;
+    matrixScale(&bscale, b, 5);
+    printf("5B=\n");
+    matrixToString(bscale);
+    printf("A and B are %sthe same size.\n", matrixIsSameSize(a, b) ? "" : "not ");
+
+    printf("A=\n");
+    matrixToString(a);
+    printf("B=\n");
+    matrixToString(b);
+
+    // Test 3D vector math
+}
 
 /************************************
  *    _   _          _              *
@@ -74,9 +127,9 @@ void matrixAdd(struct Matrix *out, struct Matrix a, struct Matrix b) {
         return;
     }
 
-    double newValues[a.numValues] = a.values;
+    double *newValues = malloc(a.numValues * sizeof(double));
     for(int i = 0; i < a.numValues; i++)
-        newValues[i] += b.values[i];
+        newValues[i] = a.values[i] + b.values[i];
 
     newMatrix(out, newValues, a.numRows, a.numColumns);
 }
@@ -88,16 +141,16 @@ void matrixSubtract(struct Matrix *out, struct Matrix a, struct Matrix b) {
         return;
     }
 
-    double newValues[a.numValues] = a.values;
+    double *newValues = malloc(a.numValues * sizeof(double));
     for(int i = 0; i < a.numValues; i++)
-        newValues[i] -= b.values[i];
+        newValues[i] = a.values[i] - b.values[i];
 
     newMatrix(out, newValues, a.numRows, a.numColumns);
 }
 
 /* Scale a matrix */
 void matrixScale(struct Matrix *out, struct Matrix a, double s) {
-    double newValues[a.numValues] = a.values;
+    double *newValues = malloc(a.numValues * sizeof(double));
     for(int i = 0; i < a.numValues; i++)
         newValues[i] = a.values[i]*s;
 
@@ -119,12 +172,12 @@ void matrixTransverse(struct Matrix *out, struct Matrix a) {
 
 }
 
-/* Calculate echelon form of a mitrix */
+/* Calculate echelon form of a matrix */
 void matrixEchelon(struct Matrix *out, struct Matrix a) {
 
 }
 
-/* Calculate reduced echelon form of a mitrix */
+/* Calculate reduced echelon form of a matrix */
 void matrixReducedEchelon(struct Matrix *out, struct Matrix a) {
     matrixEchelon(out, a);
 }
@@ -155,9 +208,40 @@ char matrixIsSameSize(struct Matrix a, struct Matrix b) {
 
 /* Calculate the determinant of a matrix */
 double matrixDeterminant(struct Matrix a) {
-    if(!matrisIsSquare(a)) {
+    if(!matrixIsSquare(a)) {
         printf("Error: The matrix is not square.");
         return 0;
+    }
+    int size = a.numColumns;
+    double det = 0.0;
+    for(int j = 0; j < size; j++) {
+        int i = j;
+        double temp = 1.0;
+        for(int k = 0; k < size; k++, i++) {
+            if(i == size) i = 0;
+            temp *= a.values[size*k+i];
+        }
+        det += temp;
+    }
+    for(int j = 0; j < size; j++) {
+        int i = j;
+        double temp = 1.0;
+        for(int k = 0; k < size; k++, i--) {
+            if(i == -1) i = size-1;
+            temp *= a.values[size*k+i];
+        }
+        det -= temp;
+    }
+    return det;
+}
+
+/* Prints the content of a matrix */
+void matrixToString(struct Matrix a) {
+    for(int i = 0; i < a.numRows; i++) {
+        for(int j = 0; j < a.numColumns; j++) {
+            printf("%f ", a.values[j+i*a.numRows]);
+        }
+        printf("\n");
     }
 }
 

@@ -85,10 +85,10 @@ void matrixInverse(struct Matrix *out, struct Matrix a, struct Matrix b);
 /* Calculate the transverse of a matrix */
 void matrixTransverse(struct Matrix *out, struct Matrix a);
 
-/* Calculate echelon form of a mitrix */
+/* Calculate echelon form of a matrix */
 void matrixEchelon(struct Matrix *out, struct Matrix a);
 
-/* Calculate reduced echelon form of a mitrix */
+/* Calculate reduced echelon form of a matrix */
 void matrixReducedEchelon(struct Matrix *out, struct Matrix a);
 
 /* Check if a matrix has a unique solution */
@@ -102,6 +102,9 @@ char matrixIsSameSize(struct Matrix a, struct Matrix b);
 
 /* Calculate the determinant of a matrix */
 double matrixDeterminant(struct Matrix a);
+
+/* Prints the content of a matrix */
+void matrixToString(struct Matrix a);
 
 
 /***********
