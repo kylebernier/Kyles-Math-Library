@@ -53,11 +53,20 @@
 int main() {
     // Test matrix math
     struct Matrix a;
-    double valuesa[9] = { 5.0, -2.0, 1.0, 0.0, 3.0, -1.0, 2.0, 0.0, 7.0 };
-    newMatrix(&a, valuesa, 3, 3);
+    //double valuesa[9] = { 5.0, -2.0, 1.0, 0.0, 3.0, -1.0, 2.0, 0.0, 7.0 };
+    double valuesa[16] = { 1.0, 3.0, -2.0, 1.0, 5.0, 1.0, 0.0, -1.0, 0.0, 1.0, 0.0, -2.0, 2.0, -1.0, 0.0, 3.0 };
+    newMatrix(&a, valuesa, 4, 4);
     struct Matrix b;
     double valuesb[9] = { 1.0, 2.0, 3.0, 0.0, -4.0, 1.0, 0.0, 3.0, -1.0 };
     newMatrix(&b, valuesb, 3, 3);
+    struct Matrix cofa;
+    matrixCofactor(&cofa, a);
+    printf("A Cofactor=\n");
+    matrixToString(cofa);
+    struct Matrix inva;
+    matrixInverse(&inva, a);
+    printf("A Inverse=\n");
+    matrixToString(inva);
     printf("A=\n");
     matrixToString(a);
     printf("B=\n");
@@ -68,19 +77,14 @@ int main() {
     printf("A is %sunique.\n", matrixIsUnique(a) ? "" : "not ");
     printf("The determinant of B is %f.\n", matrixDeterminant(b));
     printf("B is %sunique.\n", matrixIsUnique(b) ? "" : "not ");
-
-    // Add
     struct Matrix aplusb;
     matrixAdd(&aplusb, a, b);
     printf("A+B=\n");
     matrixToString(aplusb);
-
-    // Subtract
     struct Matrix asubb;
     matrixSubtract(&asubb, a, b);
     printf("A-B=\n");
     matrixToString(asubb);
-
     struct Matrix ascale;
     matrixScale(&ascale, a, 5);
     printf("5A=\n");
@@ -121,21 +125,21 @@ void newMatrix(struct Matrix *out, double *values, int rows, int columns) {
 }
 
 /* Add two matricies */
-void matrixAdd(struct Matrix *out, struct Matrix a, struct Matrix b) {
+void matrixAdd(struct Matrix *out, const struct Matrix a, const struct Matrix b) {
     if(!matrixIsSameSize(a, b)) {
         printf("Error: The matricies are not the same size.");
         return;
     }
 
-    double *newValues = malloc(a.numValues * sizeof(double));
+    out->values = malloc(a.numValues * sizeof(double));
     for(int i = 0; i < a.numValues; i++)
-        newValues[i] = a.values[i] + b.values[i];
+        out->values[i] = a.values[i] + b.values[i];
 
-    newMatrix(out, newValues, a.numRows, a.numColumns);
+    newMatrix(out, out->values, a.numRows, a.numColumns);
 }
 
 /* Subtract two matricies */
-void matrixSubtract(struct Matrix *out, struct Matrix a, struct Matrix b) {
+void matrixSubtract(struct Matrix *out, const struct Matrix a, const struct Matrix b) {
     if(!matrixIsSameSize(a, b)) {
         printf("Error: The matricies are not the same size.");
         return;
@@ -149,7 +153,7 @@ void matrixSubtract(struct Matrix *out, struct Matrix a, struct Matrix b) {
 }
 
 /* Scale a matrix */
-void matrixScale(struct Matrix *out, struct Matrix a, double s) {
+void matrixScale(struct Matrix *out, const struct Matrix a, const double s) {
     double *newValues = malloc(a.numValues * sizeof(double));
     for(int i = 0; i < a.numValues; i++)
         newValues[i] = a.values[i]*s;
@@ -158,32 +162,63 @@ void matrixScale(struct Matrix *out, struct Matrix a, double s) {
 }
 
 /* Multiply two matricies */
-void matrixMultiply(struct Matrix *out, struct Matrix a, struct Matrix b) {
+void matrixMultiply(struct Matrix *out, const struct Matrix a, const struct Matrix b) {
 
 }
 
 /* Calculate the inverse of a matrix */
-void matrixInverse(struct Matrix *out, struct Matrix a, struct Matrix b) {
-
+void matrixInverse(struct Matrix *out, const struct Matrix a) {
+    struct Matrix temp;
+    matrixCofactor(&temp, a);
+    matrixScale(out, temp, 1/matrixDeterminant(a));
 }
 
-/* Calculate the transverse of a matrix */
-void matrixTransverse(struct Matrix *out, struct Matrix a) {
+/* Calculate the cofactor of a matrix */
+void matrixCofactor(struct Matrix *out, const struct Matrix a) {
+    if(!matrixIsSquare(a)) {
+        printf("Error: The matrix is not square.");
+        return;
+    }
+    double *newValues = malloc(a.numValues * sizeof(double));
+    for(int i = 0; i < a.numRows; i++) {
+        for(int j = 0; j < a.numColumns; j++) {
+            struct Matrix temp;
+            int tempsize = (a.numRows-1) * (a.numColumns-1);
+            double valuestemp[tempsize];
+            int o = 0;
+            for (int k = 0; k < a.numRows; k++) {
+                for (int l = 0; l < a.numColumns; l++) {
+                    if(l == j) l++;
+                    if(k == i) k++;
+                    if(k == a.numRows || l == a.numColumns) break;
+                    valuestemp[o] = a.values[k*a.numColumns+l];
+                    o++;
+                }
+            }
+            newMatrix(&temp, valuestemp, a.numRows-1, a.numRows-1);
+            newValues[j*a.numRows+i] = matrixDeterminant(temp);
+        }
+    }
+    newMatrix(out, newValues, a.numRows, a.numColumns);
+}
+
+/* Calculate the transpose of a matrix */
+void matrixTranspose(struct Matrix *out, const struct Matrix a) {
 
 }
 
 /* Calculate echelon form of a matrix */
-void matrixEchelon(struct Matrix *out, struct Matrix a) {
+void matrixEchelon(struct Matrix *out, const struct Matrix a) {
 
 }
 
 /* Calculate reduced echelon form of a matrix */
-void matrixReducedEchelon(struct Matrix *out, struct Matrix a) {
+void matrixReducedEchelon(struct Matrix *out, const struct Matrix a) {
     matrixEchelon(out, a);
 }
 
 /* Check if a matrix has a unique solution */
-char matrixIsUnique(struct Matrix a) {
+char matrixIsUnique(const struct Matrix a) {
     if(matrixDeterminant(a) != 0)
         return 1;
 
@@ -191,15 +226,15 @@ char matrixIsUnique(struct Matrix a) {
 }
 
 /* Check if a matrix is square */
-char matrixIsSquare(struct Matrix a) {
+char matrixIsSquare(const struct Matrix a) {
     if(a.numColumns == a.numRows)
         return 1;
 
     return 0;
 }
 
-/* Check is two matricies are the same size */
-char matrixIsSameSize(struct Matrix a, struct Matrix b) {
+/* Check if two matricies are the same size */
+char matrixIsSameSize(const struct Matrix a, const struct Matrix b) {
     if(a.numColumns == b.numColumns && a.numRows == b.numRows)
         return 1;
 
@@ -207,36 +242,17 @@ char matrixIsSameSize(struct Matrix a, struct Matrix b) {
 }
 
 /* Calculate the determinant of a matrix */
-double matrixDeterminant(struct Matrix a) {
-    if(!matrixIsSquare(a)) {
-        printf("Error: The matrix is not square.");
-        return 0;
-    }
-    int size = a.numColumns;
-    double det = 0.0;
-    for(int j = 0; j < size; j++) {
-        int i = j;
-        double temp = 1.0;
-        for(int k = 0; k < size; k++, i++) {
-            if(i == size) i = 0;
-            temp *= a.values[size*k+i];
-        }
-        det += temp;
-    }
-    for(int j = 0; j < size; j++) {
-        int i = j;
-        double temp = 1.0;
-        for(int k = 0; k < size; k++, i--) {
-            if(i == -1) i = size-1;
-            temp *= a.values[size*k+i];
-        }
-        det -= temp;
-    }
+double matrixDeterminant(const struct Matrix a) {
+    int i,j,j1,j2;
+    double det = 0;
+    double *b;
+
+
     return det;
 }
 
 /* Prints the content of a matrix */
-void matrixToString(struct Matrix a) {
+void matrixToString(const struct Matrix a) {
     for(int i = 0; i < a.numRows; i++) {
         for(int j = 0; j < a.numColumns; j++) {
             printf("%f ", a.values[j+i*a.numRows]);

@@ -68,43 +68,46 @@ struct Matrix {
 void newMatrix(struct Matrix *out, double *values, int rows, int columns);
 
 /* Add two matricies */
-void matrixAdd(struct Matrix *out, struct Matrix a, struct Matrix b);
+void matrixAdd(struct Matrix *out, const struct Matrix a, const struct Matrix b);
 
 /* Subtract two matricies */
-void matrixSubtract(struct Matrix *out, struct Matrix a, struct Matrix b);
+void matrixSubtract(struct Matrix *out, const struct Matrix a, const struct Matrix b);
 
 /* Scale a matrix */
-void matrixScale(struct Matrix *out, struct Matrix a, double s);
+void matrixScale(struct Matrix *out, const struct Matrix a, const double s);
 
 /* Multiply two matricies */
-void matrixMultiply(struct Matrix *out, struct Matrix a, struct Matrix b);
+void matrixMultiply(struct Matrix *out, const struct Matrix a, const struct Matrix b);
 
 /* Calculate the inverse of a matrix */
-void matrixInverse(struct Matrix *out, struct Matrix a, struct Matrix b);
+void matrixInverse(struct Matrix *out, const struct Matrix a);
 
-/* Calculate the transverse of a matrix */
-void matrixTransverse(struct Matrix *out, struct Matrix a);
+/* Calculate the cofactor of a matrix */
+void matrixCofactor(struct Matrix *out, const struct Matrix a);
+
+/* Calculate the transpose of a matrix */
+void matrixTranspose(struct Matrix *out, const struct Matrix a);
 
 /* Calculate echelon form of a matrix */
-void matrixEchelon(struct Matrix *out, struct Matrix a);
+void matrixEchelon(struct Matrix *out, const struct Matrix a);
 
 /* Calculate reduced echelon form of a matrix */
-void matrixReducedEchelon(struct Matrix *out, struct Matrix a);
+void matrixReducedEchelon(struct Matrix *out, const struct Matrix a);
 
 /* Check if a matrix has a unique solution */
-char matrixIsUnique(struct Matrix a);
+char matrixIsUnique(const struct Matrix a);
 
 /* Check if a matrix is square */
-char matrixIsSquare(struct Matrix a);
+char matrixIsSquare(const struct Matrix a);
 
 /* Check is two matricies are the same size */
-char matrixIsSameSize(struct Matrix a, struct Matrix b);
+char matrixIsSameSize(const struct Matrix a, const struct Matrix b);
 
 /* Calculate the determinant of a matrix */
-double matrixDeterminant(struct Matrix a);
+double matrixDeterminant(const struct Matrix a);
 
 /* Prints the content of a matrix */
-void matrixToString(struct Matrix a);
+void matrixToString(const struct Matrix a);
 
 
 /***********
